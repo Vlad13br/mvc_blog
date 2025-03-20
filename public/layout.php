@@ -31,7 +31,6 @@ if (session_status() === PHP_SESSION_NONE) {
     <?= $content ?? '' ?>
 </div>
 
-<script src="/scripts/app.js"></script>
 <?php if (isset($additionalScripts)): ?>
     <script src="<?= $additionalScripts; ?>"></script>
 <?php endif; ?>

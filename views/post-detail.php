@@ -5,8 +5,8 @@ ob_start();
 
 <h1><?= htmlspecialchars($post['title']) ?></h1>
 <p><strong>Автор:</strong> <?= htmlspecialchars($post['name']) ?></p>
-<p><strong>Опис:</strong></p>
-<p><?= nl2br(htmlspecialchars($post['description'])) ?></p>
+<p></p>
+<div><?= $post['description'] ?></div>
 
 <form id="likeForm">
     <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
@@ -27,6 +27,7 @@ ob_start();
 <?php if (isset($_SESSION['user_id'])): ?>
     <form action="/comment" method="POST" id="commentForm">
         <input type="hidden" name="post_id" value="<?= $post['id'] ?>">
+        <input type="hidden" name="csrf_token" value="<?= $this->generateCsrfToken() ?>">
         <textarea class="comment_textarea" name="content" required></textarea>
         <button type="submit">Додати коментар</button>
     </form>

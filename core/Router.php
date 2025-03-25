@@ -1,40 +1,45 @@
 <?php
+require '../vendor/autoload.php';
+require_once '../controllers/HomeController.php';
+require_once '../controllers/AuthController.php';
+require_once '../controllers/PostController.php';
+
 class Router
 {
+    private $router;
+
+    public function __construct()
+    {
+        $this->router = new AltoRouter();
+        $this->mapRoutes();
+    }
+
+    private function mapRoutes()
+    {
+        $this->router->map('GET', '/', 'HomeController#index');
+        $this->router->map('GET', '/home', 'HomeController#index');
+        $this->router->map('GET', '/register', 'AuthController#showRegisterForm');
+        $this->router->map('POST', '/register/store', 'AuthController#register');
+        $this->router->map('GET', '/login', 'AuthController#showLoginForm');
+        $this->router->map('POST', '/login/store', 'AuthController#login');
+        $this->router->map('GET', '/logout', 'AuthController#logout');
+        $this->router->map('GET', '/create-post', 'PostController#showCreatePostForm');
+        $this->router->map('POST', '/create-post', 'PostController#createPost');
+        $this->router->map('GET', '/post/[i:id]', 'PostController#showPost');
+        $this->router->map('POST', '/comment', 'PostController#addComment');
+        $this->router->map('POST', '/like', 'PostController#addLike');
+    }
+
     public function direct($uri)
     {
-        require '../controllers/AuthController.php';
-        require '../controllers/HomeController.php';
-        require '../controllers/PostController.php';
+        $match = $this->router->match();
 
-        $authController = new AuthController();
-        $homeController = new HomeController();
-        $postController = new PostController();
+        if ($match) {
+            list($controllerName, $method) = explode('#', $match['target']);
 
-        if ($uri == '/' or $uri == '/home') {
-            $homeController->index();
-        } elseif ($uri == '/register') {
-            $authController->showRegisterForm();
-        } elseif ($uri == '/register/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $authController->register();
-        } elseif ($uri == '/login') {
-            $authController->showLoginForm();
-        } elseif ($uri == '/login/store' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $authController->login();
-        } elseif ($uri == '/logout') {
-            $authController->logout();
-        } elseif ($uri == '/create-post') {
-            if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                $postController->createPost();
-            } else {
-                $postController->showCreatePostForm();
-            }
-        } elseif (preg_match('/^\/post\/(\d+)$/', $uri, $matches)) {
-            $postController->showPost($matches[1]);
-        } elseif ($uri == '/comment' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $postController->addComment();
-        } elseif ($uri == '/like' && $_SERVER['REQUEST_METHOD'] === 'POST') {
-            $postController->addLike();
+            $controller = new $controllerName();
+
+            $controller->$method($match['params']);
         } else {
             echo "404 - Сторінка не знайдена";
         }
